@@ -355,7 +355,7 @@ const recentTransactions = transactionData.slice(0, 5);
             fontWeight="600"
             sx={{ marginBottom: "15px" }}
           >
-            Geography Based Traffic
+            Completed Transactions Statistics
           </Typography>
           <Box height="200px">
           <PieChart isDashboard={true} />

@@ -51,7 +51,11 @@ fecthLogs()
       flex: 1,
       cellClassName: "name-column--cell",
     },
-   
+    {
+      field: "agent_name",
+      headerName: "Agent Name",
+      flex: 1,
+    },
     {
       field: "service_name",
       headerName: "Service Name",

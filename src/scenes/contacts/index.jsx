@@ -4,11 +4,27 @@ import { tokens } from "../../theme";
 import { mockDataContacts } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
+import { getAllLogs } from "../../apis/dataController";
+import { useEffect, useState } from "react";
 
 const Contacts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-
+  const [transactionData,setTransactionData]=useState([]);
+  // console.log("transa:",transactionData?transactionData:null)
+  const fecthLogs=async()=>{
+const response=await getAllLogs();
+if(response.responseCode === 200){
+  const dataWithIds = response.data.map((item, index) => ({
+    ...item,
+    id: index + 1 // Assuming index is zero-based, you can adjust if necessary
+  }));
+  setTransactionData(dataWithIds)
+}
+  }
+  useEffect(()=>{
+fecthLogs()
+  },[])
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "registrarId", headerName: "Registrar ID" },
@@ -55,8 +71,8 @@ const Contacts = () => {
   return (
     <Box m="20px">
       <Header
-        title="CONTACTS"
-        subtitle="List of Contacts for Future Reference"
+        title="Failed Transaction"
+        subtitle="List of Failed Transactions"
       />
       <Box
         m="40px 0 0 0"

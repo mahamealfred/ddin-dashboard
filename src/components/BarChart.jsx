@@ -2,10 +2,51 @@ import { useTheme } from "@mui/material";
 import { ResponsiveBar } from "@nivo/bar";
 import { tokens } from "../theme";
 import { mockBarData as data } from "../data/mockData";
+import { useEffect, useState } from "react";
+import { getAllLogs } from "../apis/dataController";
 
 const BarChart = ({ isDashboard = false }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const [transactionData,setTransactionData]=useState([]);
+  // console.log("transa:",transactionData?transactionData:null)
+  const fecthLogs=async()=>{
+const response=await getAllLogs();
+if(response.responseCode === 200){
+  const dataWithIds = response.data.map((item, index) => ({
+    ...item,
+    id: index + 1 // Assuming index is zero-based, you can adjust if necessary
+  }));
+  setTransactionData(dataWithIds)
+}
+  }
+  useEffect(()=>{
+fecthLogs()
+  },[])
+
+  const processData = (data) => {
+    const serviceCounts = {};
+    data.forEach((transaction) => {
+      const serviceName = transaction.service_name;
+      if (serviceName in serviceCounts) {
+        serviceCounts[serviceName]++;
+      } else {
+        serviceCounts[serviceName] = 1;
+      }
+    });
+
+    // Prepare data in the required format for the line chart
+    const chartData = Object.keys(serviceCounts).map((serviceName) => ({
+      id: serviceName,
+      data: [{ x: serviceName, y: serviceCounts[serviceName] }],
+    }));
+
+    return chartData;
+  };
+
+  // Prepare data for the line chart
+  const chartData = processData(transactionData);
 
   return (
     <ResponsiveBar

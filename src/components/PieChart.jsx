@@ -2,13 +2,59 @@ import { ResponsivePie } from "@nivo/pie";
 import { tokens } from "../theme";
 import { useTheme } from "@mui/material";
 import { mockPieData as data } from "../data/mockData";
+import { getAllLogs } from "../apis/dataController";
+import { useEffect, useState } from "react";
 
 const PieChart = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const [transactionData,setTransactionData]=useState([]);
+  // console.log("transa:",transactionData?transactionData:null)
+  const fecthLogs=async()=>{
+const response=await getAllLogs();
+if(response.responseCode === 200){
+  const dataWithIds = response.data.map((item, index) => ({
+    ...item,
+    id: index + 1 // Assuming index is zero-based, you can adjust if necessary
+  }));
+  setTransactionData(dataWithIds)
+}
+  }
+  useEffect(()=>{
+fecthLogs()
+  },[])
+//completed transactions
+const completedTransactions = transactionData.filter(transaction => transaction.status === "Complete");
+// Count the number of completed transactions for each service
+const serviceCounts = completedTransactions.reduce((acc, curr) => {
+    const serviceName = curr.service_name;
+    if (serviceName) {
+        acc[serviceName] = (acc[serviceName] || 0) + 1;
+    }
+    return acc;
+}, {});
+//both compled ond incomplete Transactions
+//   const serviceCounts = transactionData.reduce((acc, curr) => {
+//     const serviceName = curr.service_name;
+
+//     if (serviceName) {
+//         acc[serviceName] = (acc[serviceName] || 0) + 1;
+//     }
+
+//     return acc;
+// }, {});
+
+// Convert the serviceCounts object into an array of objects compatible with mockPieData
+const pieData = Object.entries(serviceCounts).map(([service, count], index) => ({
+    id: service,
+    label: service,
+    value: count,
+    color: `hsl(${index * 60}, 70%, 50%)`, // Generate color dynamically
+}));
   return (
     <ResponsivePie
-      data={data}
+      data={pieData}
       theme={{
         axis: {
           domain: {

@@ -2,14 +2,67 @@ import { ResponsiveLine } from "@nivo/line";
 import { useTheme } from "@mui/material";
 import { tokens } from "../theme";
 import { mockLineData as data } from "../data/mockData";
+import { useEffect, useState } from "react";
+import { getAllLogs } from "../apis/dataController";
 
 const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const [transactionData,setTransactionData]=useState([]);
+  // console.log("transa:",transactionData?transactionData:null)
+  const fecthLogs=async()=>{
+const response=await getAllLogs();
+if(response.responseCode === 200){
+  const dataWithIds = response.data.map((item, index) => ({
+    ...item,
+    id: index + 1 // Assuming index is zero-based, you can adjust if necessary
+  }));
+  setTransactionData(dataWithIds)
+}
+  }
+  useEffect(()=>{
+fecthLogs()
+  },[])
+  console.log(transactionData)
+  // Step 1: Sort the transaction data by date
+transactionData.sort((a, b) => new Date(b.date.split("T")[0]) - new Date(a.date.split("T")[0]));
+
+// Step 2: Group transactions by date and service name
+const groupedData = transactionData.reduce((acc, transaction) => {
+    const date = transaction.date.split("T")[0]; // Extracting date without time
+    const serviceName = transaction.service_name;
+    
+    if (!acc[serviceName]) {
+        acc[serviceName] = {};
+    }
+    
+    if (!acc[serviceName][date]) {
+        acc[serviceName][date] = 1;
+    } else {
+        acc[serviceName][date]++;
+    }
+    
+    return acc;
+}, {});
+
+// Step 3: Convert the grouped data to the desired format
+const mockLineData = Object.entries(groupedData).map(([serviceName, dates]) => {
+    const data = Object.entries(dates)
+        .map(([date, count]) => ({ x: date, y: count }));
+    
+    return {
+        id: serviceName,
+        data,
+    };
+});
+
+  // // Prepare data for the line chart
+   const chartData = mockLineData;
+
   return (
     <ResponsiveLine
-      data={data}
+      data={chartData}
       theme={{
         axis: {
           domain: {

@@ -10,13 +10,91 @@ import Header from "../../components/Header";
 import LineChart from "../../components/LineChart";
 import GeographyChart from "../../components/GeographyChart";
 import BarChart from "../../components/BarChart";
+import PieChart from "../../components/PieChart";
 import StatBox from "../../components/StatBox";
 import ProgressCircle from "../../components/ProgressCircle";
+import { useEffect, useState } from "react";
+import { getAllLogs } from "../../apis/dataController";
 
 const Dashboard = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [transactionData,setTransactionData]=useState([]);
+  // console.log("transa:",transactionData?transactionData:null)
+  const fecthLogs=async()=>{
+const response=await getAllLogs();
+if(response.responseCode === 200){
+  const dataWithIds = response.data.map((item, index) => ({
+    ...item,
+    id: index + 1 // Assuming index is zero-based, you can adjust if necessary
+  }));
+  setTransactionData(dataWithIds)
+}
+  }
+  useEffect(()=>{
+fecthLogs()
+  },[])
+  const totalCompleteTransactions = transactionData.filter(transaction => transaction.status === 'Complete').length;
 
+// 2. Total incomplete transactions
+const totalIncompleteTransactions = transactionData.filter(transaction => transaction.status !== 'Complete').length;
+
+// 3. Total transactions for the current date
+const currentDate = new Date(); // Assuming the current date
+const totalCurrentDateTransactions = transactionData.filter(transaction => {
+    const transactionDate = new Date(transaction.date);
+    return transactionDate.toDateString() === currentDate.toDateString();
+}).length;
+
+// 3. Total transactions for the current date (completed)
+const totalCurrentDateCompletedTransactions = transactionData.filter(transaction => {
+    const transactionDate = new Date(transaction.date);
+    if(transaction.status ==="Complete")
+    return transactionDate.toDateString() === currentDate.toDateString();
+}).length;
+
+
+// 4. Total transactions grouped by service name
+const transactionsByService = {};
+transactionData.forEach(transaction => {
+    const serviceName = transaction.service_name;
+    if (!transactionsByService[serviceName]) {
+        transactionsByService[serviceName] = 0;
+    }
+    transactionsByService[serviceName]++;
+});
+
+const dailytransactionsByService = {};
+transactionData?.forEach(transaction => {
+    const serviceName = transaction.service_name;
+    if (!dailytransactionsByService[serviceName]) {
+      dailytransactionsByService[serviceName] = {
+            Complete: 0,
+            Incomplete: 0
+        };
+    }
+    if (transaction.status === 'Complete') {
+      dailytransactionsByService[serviceName].Complete++;
+    } else {
+      dailytransactionsByService[serviceName].Incomplete++;
+    }
+});
+const progressValue=(totalCompleteTransactions*100/(totalCompleteTransactions + totalIncompleteTransactions)).toFixed(2)
+// Displaying the results
+console.log("1. Total complete transactions:", totalCompleteTransactions);
+console.log("2. Total incomplete transactions:", totalIncompleteTransactions);
+console.log("3. Total transactions for the current date:", totalCurrentDateTransactions);
+console.log("4. Total transactions grouped by service name:", transactionsByService);
+console.log("5. Total Daily transactions grouped by service name:", dailytransactionsByService);
+console.log("Todaya completed tra",totalCurrentDateCompletedTransactions)
+
+
+//list of recent transacctions
+// Sort transactions by date in descending order
+transactionData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+// Display the 5 most recent transactions
+const recentTransactions = transactionData.slice(0, 5);
   return (
     <Box m="20px">
       {/* HEADER */}
@@ -55,8 +133,8 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title="12,361"
-            subtitle="Emails Sent"
+            title={totalCompleteTransactions}
+            subtitle="Completed Transactions"
             progress="0.75"
             increase="+14%"
             icon={
@@ -74,8 +152,8 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title="431,225"
-            subtitle="Sales Obtained"
+            title={totalIncompleteTransactions}
+            subtitle="Failed Transactions"
             progress="0.50"
             increase="+21%"
             icon={
@@ -93,15 +171,20 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title="32,441"
-            subtitle="New Clients"
+            title={totalCurrentDateTransactions}
+            subtitle="Today Transactions"
             progress="0.30"
             increase="+5%"
             icon={
-              <PersonAddIcon
+              <TrafficIcon
                 sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
               />
             }
+            // icon={
+            //   <PersonAddIcon
+            //     sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
+            //   />
+            // }
           />
         </Box>
         <Box
@@ -112,8 +195,8 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title="1,325,134"
-            subtitle="Traffic Received"
+            title={totalCurrentDateCompletedTransactions}
+            subtitle="Today Completed Transactions"
             progress="0.80"
             increase="+43%"
             icon={
@@ -143,14 +226,14 @@ const Dashboard = () => {
                 fontWeight="600"
                 color={colors.grey[100]}
               >
-                Revenue Generated
+                Generated Transactions
               </Typography>
               <Typography
                 variant="h3"
                 fontWeight="bold"
                 color={colors.greenAccent[500]}
               >
-                $59,342.32
+              {totalCompleteTransactions + totalIncompleteTransactions} Transactions
               </Typography>
             </Box>
             <Box>
@@ -183,9 +266,11 @@ const Dashboard = () => {
               Recent Transactions
             </Typography>
           </Box>
-          {mockTransactions.map((transaction, i) => (
+          
+
+          {recentTransactions.map((transaction, i) => (
             <Box
-              key={`${transaction.txId}-${i}`}
+              key={`${transaction.ID}-${i}`}
               display="flex"
               justifyContent="space-between"
               alignItems="center"
@@ -198,10 +283,10 @@ const Dashboard = () => {
                   variant="h5"
                   fontWeight="600"
                 >
-                  {transaction.txId}
+                  {transaction.transactionId}
                 </Typography>
                 <Typography color={colors.grey[100]}>
-                  {transaction.user}
+                  {transaction.service_name}
                 </Typography>
               </Box>
               <Box color={colors.grey[100]}>{transaction.date}</Box>
@@ -210,7 +295,7 @@ const Dashboard = () => {
                 p="5px 10px"
                 borderRadius="4px"
               >
-                ${transaction.cost}
+                Rwf{(transaction.amount)}
               </Box>
             </Box>
           ))}
@@ -224,7 +309,7 @@ const Dashboard = () => {
           p="30px"
         >
           <Typography variant="h5" fontWeight="600">
-            Campaign
+            All Transactions Status
           </Typography>
           <Box
             display="flex"
@@ -232,13 +317,13 @@ const Dashboard = () => {
             alignItems="center"
             mt="25px"
           >
-            <ProgressCircle size="125" />
+            <ProgressCircle size="125" progress={progressValue} />
             <Typography
               variant="h5"
               color={colors.greenAccent[500]}
               sx={{ mt: "15px" }}
             >
-              $48,352 revenue generated
+              {progressValue}%
             </Typography>
             <Typography>Includes extra misc expenditures and costs</Typography>
           </Box>
@@ -253,7 +338,7 @@ const Dashboard = () => {
             fontWeight="600"
             sx={{ padding: "30px 30px 0 30px" }}
           >
-            Sales Quantity
+            Service Status
           </Typography>
           <Box height="250px" mt="-20px">
             <BarChart isDashboard={true} />
@@ -273,7 +358,8 @@ const Dashboard = () => {
             Geography Based Traffic
           </Typography>
           <Box height="200px">
-            <GeographyChart isDashboard={true} />
+          <PieChart isDashboard={true} />
+            {/* <GeographyChart isDashboard={true} /> */}
           </Box>
         </Box>
       </Box>

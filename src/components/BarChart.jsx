@@ -25,32 +25,37 @@ if(response.responseCode === 200){
 fecthLogs()
   },[])
 
-  const processData = (data) => {
-    const serviceCounts = {};
-    data.forEach((transaction) => {
-      const serviceName = transaction.service_name;
-      if (serviceName in serviceCounts) {
-        serviceCounts[serviceName]++;
-      } else {
-        serviceCounts[serviceName] = 1;
-      }
-    });
+// Group transactions by service name and status
+const groupedTransactions = transactionData.reduce((acc, transaction) => {
+  const { service_name, status } = transaction;
+  if (!acc[service_name]) {
+      acc[service_name] = { Complete: 0, Incomplete: 0 };
+  }
+  acc[service_name][status]++;
+  return acc;
+}, {});
 
-    // Prepare data in the required format for the line chart
-    const chartData = Object.keys(serviceCounts).map((serviceName) => ({
-      id: serviceName,
-      data: [{ x: serviceName, y: serviceCounts[serviceName] }],
-    }));
 
-    return chartData;
-  };
+// Display the grouped transactions
+const chartData= Object.entries(groupedTransactions).map(([service, count], index) => ({
+  country: service,
+  "Complete": count.Complete,
+  // "hot dogColor": "hsl(229, 70%, 50%)",
+  "hot dogColor": "hsl(340, 70%, 50%)",
+  "Failed": count.Incomplete,
+  burgerColor: "hsl(296, 70%, 50%)",
+  // kebab: 72,
+  // kebabColor: "hsl(97, 70%, 50%)",
+  // donut: 140,
+  // donutColor: "hsl(340, 70%, 50%)",
+}));
 
   // Prepare data for the line chart
-  const chartData = processData(transactionData);
+
 
   return (
     <ResponsiveBar
-      data={data}
+      data={chartData}
       theme={{
         // added
         axis: {
@@ -80,7 +85,7 @@ fecthLogs()
           },
         },
       }}
-      keys={["hot dog", "burger", "sandwich", "kebab", "fries", "donut"]}
+      keys={["Complete", "Failed"]}
       indexBy="country"
       margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
       padding={0.3}
@@ -117,7 +122,7 @@ fecthLogs()
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "country", // changed
+        legend: isDashboard ? undefined : "Service Name", // changed
         legendPosition: "middle",
         legendOffset: 32,
       }}
@@ -125,7 +130,7 @@ fecthLogs()
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "food", // changed
+        legend: isDashboard ? undefined : "Total Transactions", // changed
         legendPosition: "middle",
         legendOffset: -40,
       }}

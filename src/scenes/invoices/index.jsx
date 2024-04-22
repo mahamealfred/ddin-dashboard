@@ -26,6 +26,8 @@ if(response.responseCode === 200){
   useEffect(()=>{
 fecthLogs()
   },[])
+
+
   const columns = [
     { field: "id", headerName: "ID" },
     {

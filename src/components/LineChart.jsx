@@ -56,7 +56,7 @@ const mockLineData = Object.entries(groupedData).map(([serviceName, dates]) => {
         data,
     };
 });
-
+console.log("data:::",mockLineData)
   // // Prepare data for the line chart
    const chartData = mockLineData;
 

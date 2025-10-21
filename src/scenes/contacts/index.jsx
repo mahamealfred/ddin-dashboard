@@ -1,15 +1,16 @@
-import { Box } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataContacts } from "../../data/mockData";
+import { mockDataInvoices } from "../../data/mockData";
 import Header from "../../components/Header";
-import { useTheme } from "@mui/material";
-import { getAllLogs } from "../../apis/dataController";
 import { useEffect, useState } from "react";
+import { getAllLogs } from "../../apis/dataController";
+import { format } from 'date-fns';
 
 const Contacts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
   const [transactionData,setTransactionData]=useState([]);
   // console.log("transa:",transactionData?transactionData:null)
   const fecthLogs=async()=>{
@@ -25,54 +26,67 @@ if(response.responseCode === 200){
   useEffect(()=>{
 fecthLogs()
   },[])
+
+
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.5 },
-    { field: "registrarId", headerName: "Registrar ID" },
+    { field: "id", headerName: "ID" },
     {
-      field: "name",
-      headerName: "Name",
+      field: "date",
+      headerName: "Date",
+      flex: 1,
+      renderCell:(params)=>(
+        <Typography>
+          {format(new Date(params.row.date), 'yyyy-MM-dd HH:mm:ss')}
+        </Typography>
+      )
+     
+    },
+    {
+      field: "transactionId",
+      headerName: "Transaction ID",
       flex: 1,
       cellClassName: "name-column--cell",
     },
     {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
+      field: "status",
+      headerName: "Status"
     },
     {
-      field: "phone",
-      headerName: "Phone Number",
+      field: "thirdpart_status",
+      headerName: "ThirdPart Status",
       flex: 1,
+      cellClassName: "name-column--cell",
     },
     {
-      field: "email",
-      headerName: "Email",
+      field: "transaction_reference",
+      headerName: "Transaction Reference",
       flex: 1,
+      cellClassName: "name-column--cell",
     },
     {
-      field: "address",
-      headerName: "Address",
-      flex: 1,
+      field: "agent_name",
+      headerName: "Agent Name"
     },
     {
-      field: "city",
-      headerName: "City",
-      flex: 1,
+      field: "service_name",
+      headerName: "Service Name"
     },
     {
-      field: "zipCode",
-      headerName: "Zip Code",
-      flex: 1,
-    },
+      field: "amount",
+      headerName: "Amount",
+      renderCell: (params) => (
+        <Typography color={colors.greenAccent[500]}>
+          Rwf {params.row.amount}
+        </Typography>
+      ),
+    }
   ];
-
+  const incompleteTransactions = transactionData.filter(transaction => transaction.status !== 'Complete');
   return (
     <Box m="20px">
       <Header
-        title="Failed Transaction"
-        subtitle="List of Failed Transactions"
+        title="Failed Transactions"
+        subtitle="List of Failed  Transactions"
       />
       <Box
         m="40px 0 0 0"
@@ -106,10 +120,8 @@ fecthLogs()
           },
         }}
       >
-        <DataGrid
-          rows={mockDataContacts}
-          columns={columns}
-          components={{ Toolbar: GridToolbar }}
+        <DataGrid checkboxSelection rows={incompleteTransactions} columns={columns} 
+        components={{ Toolbar: GridToolbar }}
         />
       </Box>
     </Box>

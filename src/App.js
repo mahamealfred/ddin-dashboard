@@ -11,6 +11,7 @@ import Form from "./scenes/form";
 import Line from "./scenes/line";
 import Pie from "./scenes/pie";
 import FAQ from "./scenes/faq";
+import Reconciliation from "./scenes/reconciliation";
 import LoginForm from "./scenes/auhthentication/Login";
 import Geography from "./scenes/geography";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -33,8 +34,9 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/team" element={<Team />} />
-              <Route path="/contacts" element={<Contacts />} />
-              <Route path="/invoices" element={<Invoices />} />
+              <Route path="/failed-transactions" element={<Contacts />} />
+              <Route path="/transactions" element={<Invoices />} />
+              <Route path="/reconciliation" element={<Reconciliation />} />
               <Route path="/form" element={<Form />} />
               <Route path="/bar" element={<Bar />} />
               <Route path="/pie" element={<Pie />} />

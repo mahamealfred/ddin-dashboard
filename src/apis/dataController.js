@@ -3,12 +3,7 @@ import axios from "axios";
 //Local PROD APIs:
 
 //LOGIN URL
-const base_remote_get_logs = "http://localhost:8000/api/v1/transactions/logs-transactions";
-
-
-
-
-
+const base_remote_get_logs = "https://app.ddin.rw/api/v1/transactions/logs-transactions";
 
 //login Auth 
 const getAllLogs = async () => {

@@ -80,7 +80,7 @@ const Sidebar = () => {
                 ml="15px"
               >
                 <Typography variant="h3" color={colors.grey[100]}>
-                DDIN Dashboard
+                Xpay Dashboard
                 </Typography>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuOutlinedIcon />
@@ -96,7 +96,7 @@ const Sidebar = () => {
                   alt="profile-user"
                   width="100px"
                   height="100px"
-                  // src={`../../assets/user.png`}
+                   src={`../../assets/ddinlogo.png`}
                   style={{ cursor: "pointer", borderRadius: "50%" }}
                 />
               </Box>
@@ -140,8 +140,8 @@ const Sidebar = () => {
               setSelected={setSelected}
             />
             <Item
-              title="Faild Transactions"
-              to="/contacts"
+              title="Failed Transactions"
+              to="/failed-transactions"
               // icon={<ContactsOutlinedIcon />}
               icon={<ReceiptOutlinedIcon />}
               selected={selected}
@@ -149,7 +149,7 @@ const Sidebar = () => {
             />
             <Item
               title="Transaction Logs"
-              to="/invoices"
+              to="/transactions"
               icon={<ReceiptOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
@@ -182,12 +182,40 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
+             <Typography
+              variant="h6"
+              color={colors.grey[300]}
+              sx={{ m: "15px 0 5px 20px" }}
+            >
+              Reconciliation
+            </Typography>
+            <Item
+              title="Make Reconciliation"
+              to="/reconciliation"
+              icon={<ReceiptOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Transactions"
+              to="#"
+              icon={<ReceiptOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Reports"
+              to="/"
+              icon={<ReceiptOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
             <Typography
               variant="h6"
               color={colors.grey[300]}
               sx={{ m: "15px 0 5px 20px" }}
             >
-              Pages
+              Settings
             </Typography>
             <Item
               title="Profile Form"

@@ -31,15 +31,24 @@ fecthLogs()
   const columns = [
     { field: "id", headerName: "ID" },
     {
+      field: "date",
+      headerName: "Date",
+      flex:1,
+      renderCell:(params)=>(
+        <Typography>
+          {format(new Date(params.row.date), 'yyyy-MM-dd HH:mm:ss')}
+        </Typography>
+      )
+     
+    },
+    {
       field: "transactionId",
       headerName: "Transaction ID",
-      flex: 1,
       cellClassName: "name-column--cell",
     },
     {
       field: "status",
-      headerName: "Status",
-      flex: 1,
+      headerName: "Status"
     },
     {
       field: "thirdpart_status",
@@ -55,35 +64,22 @@ fecthLogs()
     },
     {
       field: "agent_name",
-      headerName: "Agent Name",
-      flex: 1,
+      headerName: "Agent Name"
     },
     {
       field: "service_name",
-      headerName: "Service Name",
-      flex: 1,
+      headerName: "Service Name"
     },
     {
       field: "amount",
       headerName: "Amount",
-      flex: 1,
       renderCell: (params) => (
         <Typography color={colors.greenAccent[500]}>
           Rwf {params.row.amount}
         </Typography>
       ),
-    },
-    {
-      field: "date",
-      headerName: "Date",
-      flex: 1,
-      renderCell:(params)=>(
-        <Typography>
-          {format(new Date(params.row.date), 'yyyy-MM-dd HH:mm:ss')}
-        </Typography>
-      )
-     
-    },
+    }
+    
   ];
 
   return (
